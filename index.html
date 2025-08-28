@@ -95,7 +95,6 @@
             color: #333;
             font-size: 18px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            animation: float 2s ease-in-out infinite;
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
@@ -169,9 +168,9 @@
             font-weight: bold;
         }
 
-        .demo-card:nth-child(1) { animation-delay: 0s; }
-        .demo-card:nth-child(2) { animation-delay: 0.2s; }
-        .demo-card:nth-child(3) { animation-delay: 0.4s; }
+        .demo-card:nth-child(1) { } 
+        .demo-card:nth-child(2) { } 
+        .demo-card:nth-child(3) { }
 
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
@@ -227,13 +226,8 @@
                 
                 <div class="opponent-hand">
                     <h4>Карты противника: <span id="opponentCardCount">6</span></h4>
-                    <div class="cards-demo">
-                        <div class="demo-card back">🂠</div>
-                        <div class="demo-card back">🂠</div>
-                        <div class="demo-card back">🂠</div>
-                        <div class="demo-card back">🂠</div>
-                        <div class="demo-card back">🂠</div>
-                        <div class="demo-card back">🂠</div>
+                    <div id="opponentCards" class="cards-demo">
+                        <!-- Карты противника генерируются динамически -->
                     </div>
                 </div>
                 
@@ -459,6 +453,17 @@
                 const cardEl = createCardElement(card, index);
                 playerCardsEl.appendChild(cardEl);
             });
+            
+            // Отобразить карты противника (рубашки)
+            const opponentCardsEl = document.getElementById('opponentCards');
+            opponentCardsEl.innerHTML = '';
+            
+            for (let i = 0; i < gameState.opponentHand.length; i++) {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'demo-card back';
+                cardEl.textContent = '🂠';
+                opponentCardsEl.appendChild(cardEl);
+            }
             
             // Отобразить карты на столе
             const tableCardsEl = document.getElementById('tableCards');
