@@ -551,7 +551,9 @@
                     
                     // Проверить, все ли карты отбиты
                     if (gameState.tableCards.every(pair => pair.defend)) {
+                        // Все карты отбиты - передаем ход атакующему для возможного подкидывания
                         gameState.currentPlayer = 'opponent';
+                        gameState.attacker = 'opponent'; // Теперь противник может подкидывать
                         setTimeout(opponentMove, 1000);
                     }
                 } else {
@@ -594,7 +596,7 @@
             if (gameState.currentPlayer !== 'opponent') return;
             
             if (gameState.attacker === 'opponent') {
-                // Противник атакует
+                // Противник атакует (первая карта или подкидывание)
                 const possibleCards = gameState.opponentHand.filter(card => canAttack(card));
                 
                 if (possibleCards.length > 0 && gameState.tableCards.length < Math.min(6, gameState.playerHand.length)) {
@@ -609,8 +611,11 @@
                     updateGameDisplay();
                     updateStatus('Противник атакует картой ' + card.value + card.suit);
                 } else {
-                    // Противник не может атаковать, конец хода
-                    passTurn();
+                    // Противник не может/не хочет больше подкидывать
+                    if (gameState.tableCards.length > 0 && gameState.tableCards.every(pair => pair.defend)) {
+                        // Все карты отбиты - завершаем розыгрыш
+                        completeRound();
+                    }
                 }
             } else {
                 // Противник защищается
@@ -630,13 +635,14 @@
                         
                         // Проверить, все ли карты отбиты
                         if (gameState.tableCards.every(pair => pair.defend)) {
+                            // Все отбиты - передаем ход атакующему (игроку) для подкидывания
                             gameState.currentPlayer = 'player';
                             gameState.attacker = 'player';
                         }
                     } else {
                         // Противник не может защититься - берет карты
                         opponentTakeCards();
-                        return; // Выходим, чтобы не вызывать updateActionButtons
+                        return;
                     }
                 }
             }
@@ -663,6 +669,23 @@
             }
         }
 
+        // Завершить розыгрыш (когда все карты отбиты)
+        function completeRound() {
+            gameState.tableCards = [];
+            // Атакующий остается тем же для следующего розыгрыша
+            gameState.currentPlayer = gameState.attacker;
+            
+            updateStatus('Розыгрыш завершен - все карты отбиты');
+            
+            // Добор карт до 6 (сначала атакующий, потом защищающийся)
+            drawCards();
+            updateGameDisplay();
+            
+            if (gameState.currentPlayer === 'opponent') {
+                setTimeout(opponentMove, 1000);
+            }
+        }
+
         // Взять карты (игрок)
         function takeCards() {
             gameState.tableCards.forEach(pair => {
@@ -673,6 +696,7 @@
             });
             
             gameState.tableCards = [];
+            // Кто берет карты - тот защищается в следующем розыгрыше
             gameState.attacker = 'opponent';
             gameState.currentPlayer = 'opponent';
             
@@ -680,7 +704,7 @@
             
             // Добор карт
             drawCards();
-            updateGameDisplay(); // Сразу обновляем отображение после добора
+            updateGameDisplay();
             
             setTimeout(opponentMove, 1000);
         }
@@ -695,6 +719,7 @@
             });
             
             gameState.tableCards = [];
+            // Кто берет карты - тот защищается в следующем розыгрыше
             gameState.attacker = 'player';
             gameState.currentPlayer = 'player';
             
@@ -702,23 +727,13 @@
             
             // Добор карт
             drawCards();
-            updateGameDisplay(); // Сразу обновляем отображение после добора
+            updateGameDisplay();
         }
 
-        // Пас (бито)
+        // Пас (бито) - используется только когда игрок может подкидывать, но не хочет
         function passTurn() {
-            gameState.tableCards = [];
-            gameState.attacker = gameState.attacker === 'player' ? 'opponent' : 'player';
-            gameState.currentPlayer = gameState.attacker;
-            
-            updateStatus('Ход завершен');
-            
-            // Добор карт
-            drawCards();
-            updateGameDisplay(); // Сразу обновляем отображение после добора
-            
-            if (gameState.currentPlayer === 'opponent') {
-                setTimeout(opponentMove, 1000);
+            if (gameState.tableCards.every(pair => pair.defend)) {
+                completeRound();
             }
         }
 
