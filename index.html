@@ -600,22 +600,38 @@
                 const possibleCards = gameState.opponentHand.filter(card => canAttack(card));
                 
                 if (possibleCards.length > 0 && gameState.tableCards.length < Math.min(6, gameState.playerHand.length)) {
-                    const card = possibleCards[Math.floor(Math.random() * possibleCards.length)];
-                    const cardIndex = gameState.opponentHand.indexOf(card);
+                    // Решаем, подкидывать ли еще (если это не первая карта)
+                    const shouldContinue = gameState.tableCards.length === 0 || Math.random() > 0.4; // 60% шанс подкинуть
                     
-                    gameState.tableCards.push({ attack: card, defend: null });
+                    if (shouldContinue) {
+                        const card = possibleCards[Math.floor(Math.random() * possibleCards.length)];
+                        const cardIndex = gameState.opponentHand.indexOf(card);
+                        
+                        gameState.tableCards.push({ attack: card, defend: null });
+                        gameState.opponentHand.splice(cardIndex, 1);
+                        gameState.currentPlayer = 'player';
+                        gameState.gamePhase = 'defend';
+                        
+                        updateGameDisplay();
+                        updateStatus('Противник атакует картой ' + card.value + card.suit);
+                        return;
+                    }
+                }
+                
+                // Противник не атакует/не подкидывает - завершаем розыгрыш если все отбиты
+                if (gameState.tableCards.length > 0 && gameState.tableCards.every(pair => pair.defend)) {
+                    completeRound();
+                } else if (gameState.tableCards.length === 0) {
+                    // Первая атака - должен обязательно сходить
+                    const anyCard = gameState.opponentHand[Math.floor(Math.random() * gameState.opponentHand.length)];
+                    const cardIndex = gameState.opponentHand.indexOf(anyCard);
+                    
+                    gameState.tableCards.push({ attack: anyCard, defend: null });
                     gameState.opponentHand.splice(cardIndex, 1);
                     gameState.currentPlayer = 'player';
-                    gameState.gamePhase = 'defend';
                     
                     updateGameDisplay();
-                    updateStatus('Противник атакует картой ' + card.value + card.suit);
-                } else {
-                    // Противник не может/не хочет больше подкидывать
-                    if (gameState.tableCards.length > 0 && gameState.tableCards.every(pair => pair.defend)) {
-                        // Все карты отбиты - завершаем розыгрыш
-                        completeRound();
-                    }
+                    updateStatus('Противник атакует картой ' + anyCard.value + anyCard.suit);
                 }
             } else {
                 // Противник защищается
@@ -624,7 +640,7 @@
                     const possibleCards = gameState.opponentHand.filter(card => canDefend(card, undefendedPair.attack));
                     
                     if (possibleCards.length > 0) {
-                        const card = possibleCards[0]; // Берем первую подходящую карту
+                        const card = possibleCards[0];
                         const cardIndex = gameState.opponentHand.indexOf(card);
                         
                         undefendedPair.defend = card;
@@ -635,9 +651,10 @@
                         
                         // Проверить, все ли карты отбиты
                         if (gameState.tableCards.every(pair => pair.defend)) {
-                            // Все отбиты - передаем ход атакующему (игроку) для подкидывания
+                            // Все отбиты - ход переходит к атакующему (игроку) для подкидывания
                             gameState.currentPlayer = 'player';
-                            gameState.attacker = 'player';
+                            updateActionButtons(); // Показать кнопку "Бито" если нужно
+                            return;
                         }
                     } else {
                         // Противник не может защититься - берет карты
@@ -672,7 +689,8 @@
         // Завершить розыгрыш (когда все карты отбиты)
         function completeRound() {
             gameState.tableCards = [];
-            // Атакующий остается тем же для следующего розыгрыша
+            // В новом розыгрыше атакует тот, кто защищался
+            gameState.attacker = gameState.attacker === 'player' ? 'opponent' : 'player';
             gameState.currentPlayer = gameState.attacker;
             
             updateStatus('Розыгрыш завершен - все карты отбиты');
