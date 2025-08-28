@@ -83,6 +83,20 @@
             margin: 15px 0;
         }
 
+        .opponent-cards {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .opponent-cards .demo-card {
+            margin-left: -25px; /* Карты наезжают друг на друга */
+        }
+
+        .opponent-cards .demo-card:first-child {
+            margin-left: 0; /* Первая карта без отступа */
+        }
+
         .demo-card {
             width: 50px;
             height: 70px;
@@ -226,7 +240,7 @@
                 
                 <div class="opponent-hand">
                     <h4>Карты противника: <span id="opponentCardCount">6</span></h4>
-                    <div id="opponentCards" class="cards-demo">
+                    <div id="opponentCards" class="opponent-cards">
                         <!-- Карты противника генерируются динамически -->
                     </div>
                 </div>
@@ -259,18 +273,6 @@
             <p>🚧 Игра в разработке</p>
             <p>Скоро здесь будет полноценная игра в дурака!</p>
         </div>
-
-        <button class="button" onclick="sendMessage()">
-            📤 Отправить привет боту
-        </button>
-
-        <button class="button" onclick="showAlert()">
-            🔔 Показать уведомление
-        </button>
-
-        <button class="button" onclick="vibrate()">
-            📳 Вибрация
-        </button>
 
         <div class="status" id="status">
             Статус: Mini App загружен
