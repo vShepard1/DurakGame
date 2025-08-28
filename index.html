@@ -447,12 +447,14 @@
                 gameState.currentPlayer === 'player' ? 'Ваш' : 'Противника';
             document.getElementById('opponentCardCount').textContent = gameState.opponentHand.length;
             
-            // Отобразить карты игрока
+            // Отсортировать и отобразить карты игрока
             const playerCardsEl = document.getElementById('playerCards');
             playerCardsEl.innerHTML = '';
             
-            gameState.playerHand.forEach((card, index) => {
-                const cardEl = createCardElement(card, index);
+            const sortedHand = sortPlayerHand(gameState.playerHand);
+            sortedHand.forEach((card, index) => {
+                const originalIndex = gameState.playerHand.indexOf(card);
+                const cardEl = createCardElement(card, originalIndex);
                 playerCardsEl.appendChild(cardEl);
             });
             
@@ -496,6 +498,29 @@
             
             // Показать/скрыть кнопки действий
             updateActionButtons();
+        }
+
+        // Сортировка карт игрока
+        function sortPlayerHand(hand) {
+            // Порядок мастей (некозырные)
+            const suitOrder = ['♠', '♣', '♦', '♥'];
+            
+            // Разделяем козыри и некозыри
+            const trumpCards = hand.filter(card => card.suit === gameState.trumpSuit);
+            const nonTrumpCards = hand.filter(card => card.suit !== gameState.trumpSuit);
+            
+            // Сортируем некозырные карты по мастям, затем по рангу
+            nonTrumpCards.sort((a, b) => {
+                const suitDiff = suitOrder.indexOf(a.suit) - suitOrder.indexOf(b.suit);
+                if (suitDiff !== 0) return suitDiff;
+                return a.weight - b.weight; // От младшей к старшей
+            });
+            
+            // Сортируем козыри по рангу (от младшего к старшему)
+            trumpCards.sort((a, b) => a.weight - b.weight);
+            
+            // Возвращаем: сначала некозыри, потом козыри (козыри справа)
+            return [...nonTrumpCards, ...trumpCards];
         }
 
         // Создать элемент карты
