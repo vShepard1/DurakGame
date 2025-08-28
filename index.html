@@ -711,9 +711,17 @@
                 if (gameState.attacker !== 'player' && gameState.tableCards.some(pair => !pair.defend)) {
                     // Игрок защищается и есть неотбитые карты
                     takeBtn.style.display = 'inline-block';
-                } else if (gameState.attacker === 'player' && gameState.tableCards.length > 0 && gameState.tableCards.every(pair => pair.defend)) {
-                    // Игрок атаковал и все карты отбиты
-                    passBtn.style.display = 'inline-block';
+                } else if (gameState.attacker === 'player' && gameState.tableCards.length > 0) {
+                    // Игрок атаковал - может подкидывать или завершить ход
+                    if (gameState.tableCards.some(pair => !pair.defend)) {
+                        // Есть неотбитые карты - можно подкидывать
+                        passBtn.text = 'Хватит';
+                        passBtn.style.display = 'inline-block';
+                    } else if (gameState.tableCards.every(pair => pair.defend)) {
+                        // Все карты отбиты - можно подкидывать или сказать "бито"
+                        passBtn.text = 'Бито';
+                        passBtn.style.display = 'inline-block';
+                    }
                 }
             }
         }
@@ -782,7 +790,11 @@
 
         // Пас (бито) - используется только когда игрок может подкидывать, но не хочет
         function passTurn() {
-            if (gameState.tableCards.every(pair => pair.defend)) {
+            if (gameState.tableCards.some(pair => !pair.defend)) {
+                // Есть неотбитые карты - противник должен их взять
+                opponentTakeCards();
+            } else if (gameState.tableCards.every(pair => pair.defend)) {
+                // Все карты отбиты - завершаем розыгрыш
                 completeRound();
             }
         }
