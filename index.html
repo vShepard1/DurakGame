@@ -634,8 +634,9 @@
                             gameState.attacker = 'player';
                         }
                     } else {
-                        // Противник не может защититься
-                        takeCards();
+                        // Противник не может защититься - берет карты
+                        opponentTakeCards();
+                        return; // Выходим, чтобы не вызывать updateActionButtons
                     }
                 }
             }
@@ -662,7 +663,7 @@
             }
         }
 
-        // Взять карты
+        // Взять карты (игрок)
         function takeCards() {
             gameState.tableCards.forEach(pair => {
                 gameState.playerHand.push(pair.attack);
@@ -675,12 +676,33 @@
             gameState.attacker = 'opponent';
             gameState.currentPlayer = 'opponent';
             
-            updateGameDisplay();
             updateStatus('Вы взяли карты со стола');
             
             // Добор карт
             drawCards();
+            updateGameDisplay(); // Сразу обновляем отображение после добора
+            
             setTimeout(opponentMove, 1000);
+        }
+
+        // Взять карты (противник)
+        function opponentTakeCards() {
+            gameState.tableCards.forEach(pair => {
+                gameState.opponentHand.push(pair.attack);
+                if (pair.defend) {
+                    gameState.opponentHand.push(pair.defend);
+                }
+            });
+            
+            gameState.tableCards = [];
+            gameState.attacker = 'player';
+            gameState.currentPlayer = 'player';
+            
+            updateStatus('Противник взял карты со стола');
+            
+            // Добор карт
+            drawCards();
+            updateGameDisplay(); // Сразу обновляем отображение после добора
         }
 
         // Пас (бито)
@@ -689,11 +711,11 @@
             gameState.attacker = gameState.attacker === 'player' ? 'opponent' : 'player';
             gameState.currentPlayer = gameState.attacker;
             
-            updateGameDisplay();
             updateStatus('Ход завершен');
             
             // Добор карт
             drawCards();
+            updateGameDisplay(); // Сразу обновляем отображение после добора
             
             if (gameState.currentPlayer === 'opponent') {
                 setTimeout(opponentMove, 1000);
