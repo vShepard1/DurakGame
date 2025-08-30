@@ -41,20 +41,6 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        #gameArea {
-            display: flex;
-            flex-direction: column;
-            height: 70vh; /* общая высота игрового поля */
-        }
-
-        .table-cards {
-            flex: 1; /* занимает всё свободное место */
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* центрируем по вертикали */
-            align-items: center;
-        }
-
         .card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 16px;
@@ -97,14 +83,6 @@
             margin: 15px 0;
         }
 
-        .opponent-hand {
-            margin-bottom: 10px;
-        }
-
-        .player-hand {
-            margin-top: 10px;
-        }
-
         .opponent-cards {
             display: flex;
             justify-content: center;
@@ -134,6 +112,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
+            flex-shrink: 0; /* Предотвращает сжатие карт */
         }
 
         .demo-card.back {
@@ -158,11 +137,31 @@
         .cards-container {
             display: flex;
             gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
+            justify-content: flex-start;
             margin: 10px 0;
             min-height: 80px;
             align-items: center;
+            overflow-x: auto;
+            padding: 5px;
+            scroll-behavior: smooth;
+        }
+
+        .cards-container::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .cards-container::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+        }
+
+        .cards-container::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+        }
+
+        .cards-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
         }
 
         .game-info {
@@ -252,34 +251,34 @@
                     <div>Карт в колоде: <span id="deckCount">36</span></div>
                     <div>Ход: <span id="currentPlayer">Ваш</span></div>
                 </div>
-            
-                <div class="opponent-hand">
-                    <h4>Карты противника: <span id="opponentCardCount">6</span></h4>
-                    <div id="opponentCards" class="opponent-cards">
-                        <!-- Карты противника -->
-                    </div>
-                </div>
-            
+                
                 <div class="table-cards">
                     <h4>На столе:</h4>
                     <div id="tableCards" class="cards-container">
                         <!-- Карты на столе -->
                     </div>
                 </div>
-            
+                
+                <div class="opponent-hand">
+                    <h4>Карты противника: <span id="opponentCardCount">6</span></h4>
+                    <div id="opponentCards" class="opponent-cards">
+                        <!-- Карты противника генерируются динамически -->
+                    </div>
+                </div>
+                
                 <div class="player-hand">
                     <h4>Ваши карты:</h4>
                     <div id="playerCards" class="cards-container">
                         <!-- Карты игрока -->
                     </div>
                 </div>
-            
+                
                 <div class="game-actions">
                     <button class="button" onclick="takeCards()" id="takeBtn" style="display:none;">Взять карты</button>
                     <button class="button" onclick="passTurn()" id="passBtn" style="display:none;">Бито</button>
                 </div>
             </div>
-
+            
             <div id="gameMenu">
                 <div class="cards-demo">
                     <div class="demo-card">♠️</div>
